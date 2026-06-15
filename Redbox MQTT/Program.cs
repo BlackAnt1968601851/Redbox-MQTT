@@ -1,11 +1,8 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Formatter;
 using MQTTnet.Server;
-using System.Buffers.Text;
-using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -39,8 +36,6 @@ namespace Redbox_MQTT
         public static X509Certificate2 serverCert;
         static async Task Main(string[] args)
         {
-            //Console.WriteLine("-----BEGIN CERTIFICATE-----\nMIIDuzCCAqOgAwIBAgIINEpRyaaAOw8wDQYJKoZIhvcNAQELBQAwfTELMAkGA1UE\nBhMCVVMxCzAJBgNVBAgTAkZMMR0wGwYDVQQKExRCbGFja0FudCBDb3Jwb3JhdGlv\nbjEdMBsGA1UEAxMUQmxhY2tBbnQgQ29ycG9yYXRpb24xIzAhBgkqhkiG9w0BCQEW\nFGFkbWluQGJsYWNrYW50MDIuY29tMB4XDTI0MTExMTE3MDUwMFoXDTM5MTExMTE3\nMDUwMFowfTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkZMMR0wGwYDVQQKExRCbGFj\na0FudCBDb3Jwb3JhdGlvbjEdMBsGA1UEAxMUQmxhY2tBbnQgQ29ycG9yYXRpb24x\nIzAhBgkqhkiG9w0BCQEWFGFkbWluQGJsYWNrYW50MDIuY29tMIIBIjANBgkqhkiG\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsOUI292IpsVnBoVovyn+XSMhG5g2ajrUsj+T\nPNSnIhnWv4D3FKx3KXYynusqDs+xfHRu+Y/N+SxevcMpAsbk1stPTT8TNl+dBxxn\nL0qJQtErA/O/SuDv6+fxQzCOQXzVPX/ujf7Xx9ZkxbHruZkafjror8mB/k+pkEoe\nT2aUMQCXyJYMDTKhB614RoRuiKVDdQ6l1wHgu7H9mhwTbyf9+J+pehBMsEM9/5N9\nqp+YVkxOhuRZ4GUn2MY2lz5hqe6MPYQjTvi8BFUh8cUDvxevq4n2ptz5bsrXFFZr\nvx0qhFq6MCN0YuUNdYgB6XLBBZxNXWYMcK5zpbXBC2QBxnIxwQIDAQABoz8wPTAP\nBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQPNVTfOA7z/F8S2xRF66KbtuPBMDAL\nBgNVHQ8EBAMCAQYwDQYJKoZIhvcNAQELBQADggEBAA9pLMfEbs67GJ/LjbhzBOtb\niT4FlQru061xUBSbmRmzrG30tLlIXVKGlG8j7MvTRq/OJqPFEUaaGutB6fVXBRoE\ncMshVEbLWkdDtbH7239KrONKT3Uilz9KrLMP6K9HuAc7EXSdVVR1hG4RZqL9IA7u\nvAWPXoVY3901RCxISjyrLEJJEc6lGe6c0Y8bOvbDEKg8I/lO0mxKzp7CGBWmPrXC\nZmz27JJ9WP3bbCFTTiOP2bq/Q+f3AFNIiKN34O4IxBKfkOXdlrhbojBOa1wybASR\niNFgfwQStoEmy+/6GQtS/XgXU17+x40GpMF21JwrVk70bfxNecDzULNpQpwq7tg=\n-----END CERTIFICATE-----\n");
-            //await Task.Delay(-1);
             if (args.Length != 0)
             {
                 if (args[0] == "/cert")
@@ -48,7 +43,6 @@ namespace Redbox_MQTT
                     try
                     {
                         byte[] devicecert = File.ReadAllBytes("Device.pfx");
-                        //Console.WriteLine(Convert.ToBase64String(devicecert));
                         File.WriteAllText("iotcertificatedata.json", "{\r\n\t\"DeviceCertPfxBase64\":\"" + Convert.ToBase64String(devicecert) + "\",\r\n\t\"RootCa\":\"-----BEGIN CERTIFICATE-----\\nMIIDuzCCAqOgAwIBAgIINEpRyaaAOw8wDQYJKoZIhvcNAQELBQAwfTELMAkGA1UE\\nBhMCVVMxCzAJBgNVBAgTAkZMMR0wGwYDVQQKExRCbGFja0FudCBDb3Jwb3JhdGlv\\nbjEdMBsGA1UEAxMUQmxhY2tBbnQgQ29ycG9yYXRpb24xIzAhBgkqhkiG9w0BCQEW\\nFGFkbWluQGJsYWNrYW50MDIuY29tMB4XDTI0MTExMTE3MDUwMFoXDTM5MTExMTE3\\nMDUwMFowfTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkZMMR0wGwYDVQQKExRCbGFj\\na0FudCBDb3Jwb3JhdGlvbjEdMBsGA1UEAxMUQmxhY2tBbnQgQ29ycG9yYXRpb24x\\nIzAhBgkqhkiG9w0BCQEWFGFkbWluQGJsYWNrYW50MDIuY29tMIIBIjANBgkqhkiG\\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsOUI292IpsVnBoVovyn+XSMhG5g2ajrUsj+T\\nPNSnIhnWv4D3FKx3KXYynusqDs+xfHRu+Y/N+SxevcMpAsbk1stPTT8TNl+dBxxn\\nL0qJQtErA/O/SuDv6+fxQzCOQXzVPX/ujf7Xx9ZkxbHruZkafjror8mB/k+pkEoe\\nT2aUMQCXyJYMDTKhB614RoRuiKVDdQ6l1wHgu7H9mhwTbyf9+J+pehBMsEM9/5N9\\nqp+YVkxOhuRZ4GUn2MY2lz5hqe6MPYQjTvi8BFUh8cUDvxevq4n2ptz5bsrXFFZr\\nvx0qhFq6MCN0YuUNdYgB6XLBBZxNXWYMcK5zpbXBC2QBxnIxwQIDAQABoz8wPTAP\\nBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQPNVTfOA7z/F8S2xRF66KbtuPBMDAL\\nBgNVHQ8EBAMCAQYwDQYJKoZIhvcNAQELBQADggEBAA9pLMfEbs67GJ/LjbhzBOtb\\niT4FlQru061xUBSbmRmzrG30tLlIXVKGlG8j7MvTRq/OJqPFEUaaGutB6fVXBRoE\\ncMshVEbLWkdDtbH7239KrONKT3Uilz9KrLMP6K9HuAc7EXSdVVR1hG4RZqL9IA7u\\nvAWPXoVY3901RCxISjyrLEJJEc6lGe6c0Y8bOvbDEKg8I/lO0mxKzp7CGBWmPrXC\\nZmz27JJ9WP3bbCFTTiOP2bq/Q+f3AFNIiKN34O4IxBKfkOXdlrhbojBOa1wybASR\\niNFgfwQStoEmy+/6GQtS/XgXU17+x40GpMF21JwrVk70bfxNecDzULNpQpwq7tg=\\n-----END CERTIFICATE-----\\n\",\r\n\t\"CertificateId\":\"08f09ce43023ffae5ac613822bc17592cbfe61f09e92f9090db02846864fcfe6\"\r\n}");
                         Console.WriteLine("Successfully Written Certificate!");
                         await Task.Delay(-1);
@@ -98,7 +92,7 @@ namespace Redbox_MQTT
                 .Build();
 
             await mqttServer.StartAsync(options);
-            //await Task.Delay(5000);
+            await Task.Delay(5000);
             await ClientConn(mqttServer);
             Console.WriteLine("MQTT server is running on port 8883...");
             await Task.Delay(-1);

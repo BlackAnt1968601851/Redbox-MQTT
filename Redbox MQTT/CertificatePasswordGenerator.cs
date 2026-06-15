@@ -26,15 +26,5 @@ namespace Redbox_MQTT
             array = sha.ComputeHash(Encoding.UTF8.GetBytes(text + saltOfTheCertificatePassword));
             return Convert.ToBase64String(array);
         }
-
-
-        static async Task Maina(string[] args)
-        {
-            Console.Write("Enter Your Kiosk ID: ");
-            string kioskidnum = Console.ReadLine();
-            CertificatePasswordGenerator creator = new CertificatePasswordGenerator(); // Create an instance
-            string result = await creator.GetCertificatePassword(kioskidnum);
-            Console.WriteLine(result); // Optionally, print the result
-        }
     }
 }
