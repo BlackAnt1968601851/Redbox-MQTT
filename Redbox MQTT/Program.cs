@@ -1,8 +1,10 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Formatter;
 using MQTTnet.Server;
+using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -61,18 +63,33 @@ namespace Redbox_MQTT
         public static async Task ClientConn(IMqttServer mqttServer)
         {
             IMqttClient client = new MqttFactory().CreateMqttClient();
-            MqttClientOptionsBuilderTlsParameters tlsoptions = new MqttClientOptionsBuilderTlsParameters();
-            tlsoptions.CertificateValidationHandler = (MqttClientCertificateValidationCallbackContext test) =>
+            MqttClientOptionsBuilderTlsParameters tlsoptions = new MqttClientOptionsBuilderTlsParameters
             {
-                return true;
+                UseTls = true,
+                CertificateValidationCallback = (certificate, chain, sslPolicyErrors, options) =>
+                {
+                    if (sslPolicyErrors.ToString() != "None")
+                    {
+                        Console.WriteLine("SSL Validation failed: " + sslPolicyErrors.ToString());
+                        return false;
+                    }
+                    return true;
+                }
             };
             var clientoptions = new MqttFactory().CreateClientOptionsBuilder()
                 .WithTcpServer("mqtt.blackant02.com", 8883)
                 .WithProtocolVersion(MqttProtocolVersion.V311)
                 .WithClientId("Server")
-                .WithTls()
+                .WithTls(tlsoptions)
             .Build();
-            await client.ConnectAsync(clientoptions);
+            try
+            {
+                await client.ConnectAsync(clientoptions);
+            }
+            catch
+            {
+                await Task.Delay(-1);
+            }
             mqttServer.UseApplicationMessageReceivedHandler(e =>
             {
                 if (e.ClientId != "Server")
