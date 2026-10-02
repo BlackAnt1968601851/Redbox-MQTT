@@ -1,4 +1,4 @@
-# Redbox MQTT Server Recration
+# Redbox MQTT Server Recreation
 
 ## What is it?
 The Redbox MQTT Server is responsible for the update client for sending commands and configuration to the redbox machine
